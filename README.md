@@ -20,6 +20,9 @@ O repositório está organizado de forma limpa diretamente na raiz, facilitando 
 * **`📁 Projeto 02 - Subway Builder`**: Projeto prático individual focado na simulação completa e passo a passo de um sistema de pedidos personalizado, aplicando o padrão **GoF – Builder**.
 * **`📁 Projeto 03 - McDonald's`**: Exercício prático focado na prototipagem e gerenciamento estruturado de ofertas.
 * **`📁 Projeto 04 - Estacionamento`**: Sistema prático de controle de entrada e saída de veículos integrado à interface HTML e Node.js, aplicando o padrão **GoF – Singleton**.
+* **`📁 Projeto 05 — Controlador de Acesso (Chain of Responsibility)
+
+Implementação de um **Controlador de Acesso (Catraca)** em Node.js e SQLite[cite: 9, 10], integrado a um sistema CRUD completo de utilizadores[cite: 3]. O projeto utiliza o padrão comportamental **Chain of Responsibility** para validar de forma sequencial o formato dos dados, a existência do cadastro, a senha e o status da conta antes de liberar a passagem[cite: 3, 12].
 
 ---
 
@@ -51,6 +54,35 @@ O repositório está organizado de forma limpa diretamente na raiz, facilitando 
   - Controle de entrada/saída com validação de campos, impedimento de placas duplicadas e pátio lotado.
   - Atualização em tempo real do painel de vagas (Totais, Ocupadas e Disponíveis) e da lista exibida no DOM.
   - Registros formatados no console a cada operação e validação de identidade de instâncias (`estacionamento1 === estacionamento2`).
+
+---
+
+## 🚪 Projeto 05 — Controlador de Acesso (Chain of Responsibility)
+
+### 📝 Descrição do Projeto
+O **Projeto 05** consiste na implementação de um **Controlador de Acesso (Catraca)** integrado a um sistema CRUD de utilizadores. A validação das permissões de acesso e credenciais foi desenvolvida utilizando o padrão de projeto comportamental **Chain of Responsibility** (Corrente de Responsabilidade).
+
+A aplicação intercepta os pedidos de acesso e os processa sequencialmente através de uma cadeia de manipuladores (*handlers*). Caso qualquer uma das validações falhe, o fluxo é interrompido imediatamente e o evento é registado na base de dados.
+
+---
+
+### ⚙️ Padrão Chain of Responsibility
+O fluxo de validação da catraca segue a seguinte cadeia sequencial:
+
+
+[ Requisição de Acesso ]
+          │
+          ▼
+1. InputValidationHandler        ──(Falha: Dados inválidos)──────► [ HTTP 400 ]
+          │ (OK)
+          ▼
+2. UserLookupHandler             ──(Falha: Usuário não existe)───► [ HTTP 404 / Registo em BD ]
+          │ (OK)
+          ▼
+3. CredentialsValidationHandler ──(Falha: Senha errada/Inativo)─► [ HTTP 401 / Registo em BD ]
+          │ (OK)
+          ▼
+4. AccessGrantedHandler         ──(Sucesso: Catraca Liberada)───► [ HTTP 200 / Registo em BD ]
 
 ---
 
