@@ -21,7 +21,7 @@ O repositório está organizado de forma limpa diretamente na raiz, facilitando 
 * **`📁 Projeto 03 - McDonald's`**: Exercício prático focado na prototipagem e gerenciamento estruturado de ofertas.
 * **`📁 Projeto 04 - Estacionamento`**: Sistema prático de controle de entrada e saída de veículos integrado à interface HTML e Node.js, aplicando o padrão **GoF – Singleton**.
 * **`📁 Projeto 05 — Controlador de Acesso (Chain of Responsibility)`**:
-Implementação de um **Controlador de Acesso (Catraca)** em Node.js e SQLite[cite: 9, 10], integrado a um sistema CRUD completo de utilizadores[cite: 3]. O projeto utiliza o padrão comportamental **Chain of Responsibility** para validar de forma sequencial o formato dos dados, a existência do cadastro, a senha e o status da conta antes de liberar a passagem[cite: 3, 12].
+Implementação de um **Controlador de Acesso (Catraca)** em Node.js e SQLite, integrado a um sistema CRUD completo de utilizadores. O projeto utiliza o padrão comportamental **Chain of Responsibility** para validar de forma sequencial o formato dos dados, a existência do cadastro, a senha e o status da conta antes de liberar a passagem.
 
 ---
 
