@@ -1,0 +1,17 @@
+{
+  "name": "261007_cadastro_crud",
+  "version": "1.0.0",
+  "description": "Sistema de Controle de acesso CRUD",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+  "type": "module",
+  "keywords": [],
+  "author": "Helder",
+  "license": "MIT",
+  "dependencies": {
+    "sqlite3": "^6.0.1"
+  }
+}

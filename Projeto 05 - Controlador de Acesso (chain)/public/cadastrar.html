@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastrar Pessoa</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header>
+    <div class="header-inner">
+        <h1 class="brand">Sistema de Controle de Acesso</h1>
+        <nav>
+            <a href="/">Acesso</a>
+            <a href="/consultar.html">Consultar</a>
+            <a href="/cadastrar.html" class="active">Cadastrar</a>
+            <a href="/atualizar.html">Atualizar</a>
+            <a href="/excluir.html">Excluir</a>
+        </nav>
+    </div>
+</header>
+
+<main>
+    <section class="card">
+        <h1>Cadastrar Nova Pessoa</h1>
+        <p class="help">O ID de acesso será gerado automaticamente pelo banco.</p>
+
+        <form id="formCadastro">
+            <div class="form-grid">
+                <div class="form-group full">
+                    <label for="nome">Nome</label>
+                    <input type="text" id="nome" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="dataNascimento">Data de Nascimento</label>
+                    <input type="date" id="dataNascimento" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="tipo">Tipo</label>
+                    <select id="tipo" required>
+                        <option value="">Selecione</option>
+                        <option value="ALUNO">Aluno</option>
+                        <option value="PROFESSOR">Professor</option>
+                        <option value="FUNCIONARIO">Funcionário</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="senha">Senha de Acesso</label>
+                    <input type="text" id="senha" inputmode="numeric" maxlength="5" pattern="\d{5}" required placeholder="5 dígitos">
+                </div>
+
+                <div class="form-group">
+                    <label for="ativo">Status</label>
+                    <select id="ativo">
+                        <option value="1">Ativo</option>
+                        <option value="0">Inativo</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button type="submit" class="success">Cadastrar</button>
+                <button type="reset" class="warning">Limpar</button>
+            </div>
+        </form>
+
+        <div id="mensagem" class="message"></div>
+    </section>
+</main>
+
+<script>
+    document.getElementById('senha').addEventListener('input', e => {
+        e.target.value = e.target.value.replace(/\D/g, '').slice(0, 5);
+    });
+
+    function mostrarMensagem(tipo, html) {
+        const elemento = document.getElementById('mensagem');
+        elemento.className = `message show ${tipo}`;
+        elemento.innerHTML = html;
+    }
+
+    document.getElementById('formCadastro').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const payload = {
+            nome: document.getElementById('nome').value,
+            email: document.getElementById('email').value,
+            data_nascimento: document.getElementById('dataNascimento').value,
+            tipo: document.getElementById('tipo').value,
+            senha: document.getElementById('senha').value,
+            ativo: document.getElementById('ativo').value
+        };
+
+        const resposta = await fetch('/api/pessoas', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const dados = await resposta.json();
+
+        if (resposta.ok) {
+            mostrarMensagem(
+                'success',
+                `Cadastro realizado com sucesso.<br>ID de acesso gerado: <strong>${dados.id}</strong>`
+            );
+            document.getElementById('formCadastro').reset();
+        } else {
+            mostrarMensagem('danger', `${dados.error || 'Erro ao cadastrar.'}`);
+        }
+    });
+</script>
+</body>
+</html>

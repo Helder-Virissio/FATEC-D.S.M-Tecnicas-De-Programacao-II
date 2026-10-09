@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excluir Cadastro</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header>
+    <div class="header-inner">
+        <h1 class="brand">Sistema de Controle de Acesso</h1>
+        <nav>
+            <a href="/">Acesso</a>
+            <a href="/consultar.html">Consultar</a>
+            <a href="/cadastrar.html">Cadastrar</a>
+            <a href="/atualizar.html">Atualizar</a>
+            <a href="/excluir.html" class="active">Excluir</a>
+        </nav>
+    </div>
+</header>
+
+<main>
+    <section class="card">
+        <h1>Excluir Cadastro</h1>
+        <p class="help">Localize primeiro a pessoa pelo ID. A exclusão só será realizada após confirmação.</p>
+
+        <div class="form-group">
+            <label for="idBusca">ID da pessoa</label>
+            <input type="number" id="idBusca" min="1" placeholder="Digite o ID">
+        </div>
+        <button onclick="buscarPessoa()">Localizar</button>
+        <div id="mensagemBusca" class="message"></div>
+    </section>
+
+    <section class="card" id="cardPessoa" style="display:none;">
+        <h2>Pessoa Encontrada</h2>
+        <p><strong>ID:</strong> <span id="pId"></span></p>
+        <p><strong>Nome:</strong> <span id="pNome"></span></p>
+        <p><strong>E-mail:</strong> <span id="pEmail"></span></p>
+        <p><strong>Tipo:</strong> <span id="pTipo"></span></p>
+        <p><strong>Status:</strong> <span id="pStatus"></span></p>
+
+        <button class="danger" onclick="excluirPessoa()">Excluir Definitivamente</button>
+        <div id="mensagemExclusao" class="message"></div>
+    </section>
+</main>
+
+<script>
+    let pessoaAtual = null;
+
+    function mensagem(idElemento, tipo, texto) {
+        const elemento = document.getElementById(idElemento);
+        elemento.className = `message show ${tipo}`;
+        elemento.innerHTML = texto;
+    }
+
+    async function buscarPessoa() {
+        const id = document.getElementById('idBusca').value;
+        document.getElementById('cardPessoa').style.display = 'none';
+
+        if (!id) return mensagem('mensagemBusca', 'warning', 'Informe um ID.');
+
+        const resposta = await fetch(`/api/pessoas?id=${id}`);
+        const dados = await resposta.json();
+
+        if (!resposta.ok) {
+            pessoaAtual = null;
+            return mensagem('mensagemBusca', 'danger', dados.error || 'Usuário não encontrado.');
+        }
+
+        pessoaAtual = dados;
+        document.getElementById('pId').textContent = dados.id;
+        document.getElementById('pNome').textContent = dados.nome;
+        document.getElementById('pEmail').textContent = dados.email;
+        document.getElementById('pTipo').textContent = dados.tipo;
+        document.getElementById('pStatus').textContent = dados.ativo ? 'ATIVO' : 'INATIVO';
+        document.getElementById('cardPessoa').style.display = 'block';
+
+        mensagem('mensagemBusca', 'info', 'Cadastro localizado. Confira os dados antes de excluir.');
+    }
+
+    async function excluirPessoa() {
+        if (!pessoaAtual) return;
+
+        const confirmado = confirm(`Tem certeza que deseja excluir ${pessoaAtual.nome} (ID ${pessoaAtual.id})?`);
+        if (!confirmado) return;
+
+        const resposta = await fetch(`/api/pessoas?id=${pessoaAtual.id}`, {
+            method: 'DELETE'
+        });
+        const dados = await resposta.json();
+
+        if (resposta.ok) {
+            mensagem('mensagemExclusao', 'success', 'Cadastro excluído com sucesso.');
+            pessoaAtual = null;
+            setTimeout(() => {
+                document.getElementById('cardPessoa').style.display = 'none';
+                document.getElementById('idBusca').value = '';
+            }, 1000);
+        } else {
+            mensagem('mensagemExclusao', 'danger', `${dados.error || 'Erro ao excluir.'}`);
+        }
+    }
+</script>
+</body>
+</html>

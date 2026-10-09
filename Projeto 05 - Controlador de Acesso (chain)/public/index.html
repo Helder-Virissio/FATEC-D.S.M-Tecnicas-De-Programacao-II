@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Acesso</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header>
+    <div class="header-inner">
+        <h1 class="brand">Sistema de Controle de Acesso</h1>
+        <nav>
+            <a href="/" class="active">Acesso</a>
+            <a href="/consultar.html">Consultar</a>
+            <a href="/cadastrar.html">Cadastrar</a>
+            <a href="/atualizar.html">Atualizar</a>
+            <a href="/excluir.html">Excluir</a>
+        </nav>
+    </div>
+</header>
+
+<main>
+    <div class="grid-stats">
+        <div class="stat"><span>Total</span><strong id="total">-</strong></div>
+        <div class="stat"><span>Alunos</span><strong id="alunos">-</strong></div>
+        <div class="stat"><span>Professores</span><strong id="professores">-</strong></div>
+        <div class="stat"><span>Funcionários</span><strong id="funcionarios">-</strong></div>
+    </div>
+
+    <section class="card access-box">
+        <div class="access-icon"></div>
+        <h2>Identificação de Usuário</h2>
+        <p class="help">Informe seu ID e sua senha numérica de 5 dígitos.</p>
+
+        <form id="formAcesso">
+            <div class="form-group">
+                <label for="id">ID</label>
+                <input type="number" id="id" min="1" required placeholder="Ex.: 1">
+            </div>
+
+            <div class="form-group">
+                <label for="senha">Senha</label>
+                <input type="password" id="senha" inputmode="numeric" maxlength="5" pattern="\d{5}" required placeholder="5 dígitos">
+            </div>
+
+            <button type="submit">Verificar Acesso</button>
+        </form>
+
+        <div id="mensagem" class="message"></div>
+
+        <div class="demo">
+            <strong>Testes rápidos:</strong><br>
+            Acesso liberado: ID <strong>1</strong> / senha <strong>10001</strong><br>
+            Acesso negado: ID <strong>1</strong> / senha <strong>99999</strong><br>
+            Não cadastrado: ID <strong>999</strong> / senha <strong>12345</strong>
+        </div>
+    </section>
+</main>
+
+<script>
+    async function carregarEstatisticas() {
+        const resposta = await fetch('/api/estatisticas');
+        const dados = await resposta.json();
+        document.getElementById('total').textContent = dados.total ?? 0;
+        document.getElementById('alunos').textContent = dados.alunos ?? 0;
+        document.getElementById('professores').textContent = dados.professores ?? 0;
+        document.getElementById('funcionarios').textContent = dados.funcionarios ?? 0;
+    }
+
+    function mostrarMensagem(tipo, html) {
+        const elemento = document.getElementById('mensagem');
+        elemento.className = `message show ${tipo}`;
+        elemento.innerHTML = html;
+    }
+
+    document.getElementById('senha').addEventListener('input', (e) => {
+        e.target.value = e.target.value.replace(/\D/g, '').slice(0, 5);
+    });
+
+    document.getElementById('formAcesso').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const id = document.getElementById('id').value;
+        const senha = document.getElementById('senha').value;
+
+        const resposta = await fetch('/api/acesso', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, senha })
+        });
+
+        const dados = await resposta.json();
+
+        if (dados.status === 'liberado') {
+            mostrarMensagem(
+                'success',
+                `ACESSO LIBERADO<br><br>${dados.pessoa.nome}<br>${dados.pessoa.tipo} — ID ${dados.pessoa.id}`
+            );
+        } else if (dados.status === 'nao_cadastrado') {
+            mostrarMensagem('warning', 'USUÁRIO NÃO CADASTRADO');
+        } else if (dados.status === 'negado') {
+            mostrarMensagem('danger', 'ACESSO NEGADO');
+        } else {
+            mostrarMensagem('danger', dados.message || 'Erro ao verificar acesso.');
+        }
+    });
+
+    carregarEstatisticas();
+</script>
+</body>
+</html>

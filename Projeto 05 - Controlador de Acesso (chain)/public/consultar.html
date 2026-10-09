@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultar Pessoas</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header>
+    <div class="header-inner">
+        <h1 class="brand">Sistema de Controle de Acesso</h1>
+        <nav>
+            <a href="/">Acesso</a>
+            <a href="/consultar.html" class="active">Consultar</a>
+            <a href="/cadastrar.html">Cadastrar</a>
+            <a href="/atualizar.html">Atualizar</a>
+            <a href="/excluir.html">Excluir</a>
+        </nav>
+    </div>
+</header>
+
+<main>
+    <section class="card">
+        <h1>Consultar Pessoas</h1>
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="busca">ID, nome ou e-mail</label>
+                <input id="busca" type="text" placeholder="Digite para pesquisar">
+            </div>
+            <div class="form-group">
+                <label for="tipo">Tipo</label>
+                <select id="tipo">
+                    <option value="">Todos</option>
+                    <option value="ALUNO">Aluno</option>
+                    <option value="PROFESSOR">Professor</option>
+                    <option value="FUNCIONARIO">Funcionário</option>
+                </select>
+            </div>
+        </div>
+        <div class="actions">
+            <button onclick="carregarDados()">Pesquisar</button>
+            <button class="warning" onclick="limparFiltros()">Limpar Filtros</button>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2>Cadastros</h2>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>E-mail</th>
+                        <th>Nascimento</th>
+                        <th>Tipo</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaCorpo"></tbody>
+            </table>
+        </div>
+        <p id="quantidade" class="help"></p>
+    </section>
+</main>
+
+<script>
+    function formatarData(data) {
+        const [ano, mes, dia] = data.split('-');
+        return `${dia}/${mes}/${ano}`;
+    }
+
+    function badgeTipo(tipo) {
+        const classe = tipo.toLowerCase();
+        const texto = tipo === 'FUNCIONARIO' ? 'Funcionário' : tipo.charAt(0) + tipo.slice(1).toLowerCase();
+        return `<span class="badge ${classe}">${texto}</span>`;
+    }
+
+    async function carregarDados() {
+        const busca = document.getElementById('busca').value.trim();
+        const tipo = document.getElementById('tipo').value;
+
+        const params = new URLSearchParams();
+        if (busca) params.set('q', busca);
+        if (tipo) params.set('tipo', tipo);
+
+        const resposta = await fetch(`/api/pessoas?${params.toString()}`);
+        const pessoas = await resposta.json();
+        const tbody = document.getElementById('tabelaCorpo');
+
+        tbody.innerHTML = '';
+
+        pessoas.forEach(p => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${p.id}</td>
+                    <td>${p.nome}</td>
+                    <td>${p.email}</td>
+                    <td>${formatarData(p.data_nascimento)}</td>
+                    <td>${badgeTipo(p.tipo)}</td>
+                    <td>${p.ativo ? '<span class="badge ativo">Ativo</span>' : '<span class="badge inativo">Inativo</span>'}</td>
+                </tr>
+            `;
+        });
+
+        document.getElementById('quantidade').textContent = `${pessoas.length} registro(s) encontrado(s).`;
+    }
+
+    function limparFiltros() {
+        document.getElementById('busca').value = '';
+        document.getElementById('tipo').value = '';
+        carregarDados();
+    }
+
+    document.getElementById('busca').addEventListener('keydown', e => {
+        if (e.key === 'Enter') carregarDados();
+    });
+
+    carregarDados();
+</script>
+</body>
+</html>
